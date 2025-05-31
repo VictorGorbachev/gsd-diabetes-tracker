@@ -15,8 +15,10 @@
                     <h2>Дневник сахара</h2>
                     <p>Анна Шведюк</p>                    
                 </div>
-                <img src="icons/settings.svg" alt="Settings" class="input-icon settings-icon" style="cursor: pointer;">
+                <img src="icons/settings.svg" alt="Settings" class="settings-icon">
             </div>
+            
+            <!-- Дата и время -->
             <div class="form-row">
                 <div class="input-group">
                     <img src="icons/calendar-24.svg" alt="Calendar" class="input-icon">
@@ -28,42 +30,50 @@
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="input-group">
+            <!-- Сахар -->
+            <div class="form-row single">
+                <div class="input-group full-width">
                     <img src="icons/sugar-24.svg" alt="Sugar" class="input-icon">
                     <input type="number" id="sugar" step="0.1" placeholder="Сахар">
                 </div>
-                <div class="input-group">
+            </div>
+
+            <!-- Инсулин -->
+            <div class="form-row single">
+                <div class="input-group full-width">
                     <img src="icons/insulin-24.svg" alt="Insulin" class="input-icon">
-                    <select class="insulin-select" id="insulin">
-                        <option value="">Нет</option>
-                        <option value="novorapid" selected>Новорапид</option>
-                        <option value="levemir">Левемир</option>
-                    </select>
-                    <div id="insulinUnits" class="insulin-units" style="display: flex;">
-                        <button type="button" class="units-btn units-btn-left" id="decreaseUnits">
-                            <img src="icons/minus-24.svg" alt="Decrease">
-                        </button>
-                        <span id="unitsValue">8</span>
-                        <button type="button" class="units-btn units-btn-right" id="increaseUnits">
-                            <img src="icons/plus-24.svg" alt="Increase">
-                        </button>
+                    <div class="insulin-group">
+                        <select class="insulin-select" id="insulin">
+                            <option value="">Нет</option>
+                            <option value="novorapid" selected>Новорапид</option>
+                            <option value="levemir">Левемир</option>
+                        </select>
+                        <div id="insulinUnits" class="insulin-units" style="display: flex;">
+                            <button type="button" class="units-btn" id="decreaseUnits">
+                                <img src="icons/minus-24.svg" alt="Decrease">
+                            </button>
+                            <span id="unitsValue">8</span>
+                            <button type="button" class="units-btn" id="increaseUnits">
+                                <img src="icons/plus-24.svg" alt="Increase">
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="input-group food-group">
+            <!-- Еда -->
+            <div class="form-row single">
+                <div class="input-group food-group full-width">
                     <img src="icons/bread-units-24.svg" alt="Food" class="input-icon">
                     <div class="food-row">
                         <textarea id="food" placeholder="Еда"></textarea>
                         <div id="chipsContainer" class="chips-container" style="display: none;"></div>
-                        <div id="breadUnits" class="bread-units" style="display: none;">
-                            <button type="button" class="units-btn units-btn-left" id="decreaseBreadUnits">
+                        <div id="breadUnits" class="bread-units">
+                            <button type="button" class="units-btn" id="decreaseBreadUnits">
                                 <img src="icons/minus-24.svg" alt="Decrease">
                             </button>
                             <span id="breadUnitsValue">1.0</span>
-                            <button type="button" class="units-btn units-btn-right" id="increaseBreadUnits">
+                            <button type="button" class="units-btn" id="increaseBreadUnits">
                                 <img src="icons/plus-24.svg" alt="Increase">
                             </button>
                         </div>                        
@@ -142,40 +152,44 @@
                         <input type="time" id="editTime" required>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="input-group">
+                <div class="form-row single">
+                    <div class="input-group full-width">
                         <img src="icons/sugar-24.svg" alt="Sugar" class="input-icon">
                         <input type="number" id="editSugar" step="0.1" placeholder="Сахар">
                     </div>
-                    <div class="input-group">
+                </div>
+                <div class="form-row single">
+                    <div class="input-group full-width">
                         <img src="icons/insulin-24.svg" alt="Insulin" class="input-icon">
-                        <select class="insulin-select" id="editInsulin">
-                            <option value="">Нет</option>
-                            <option value="novorapid">Новорапид</option>
-                            <option value="levemir">Левемир</option>
-                        </select>
-                        <div id="editInsulinUnits" class="insulin-units">
-                            <button type="button" class="units-btn units-btn-left" id="editDecreaseUnits">
-                                <img src="icons/minus-24.svg" alt="Decrease">
-                            </button>
-                            <span id="editUnitsValue">5</span>
-                            <button type="button" class="units-btn units-btn-right" id="editIncreaseUnits">
-                                <img src="icons/plus-24.svg" alt="Increase">
-                            </button>
+                        <div class="insulin-group">
+                            <select class="insulin-select" id="editInsulin">
+                                <option value="">Нет</option>
+                                <option value="novorapid">Новорапид</option>
+                                <option value="levemir">Левемир</option>
+                            </select>
+                            <div id="editInsulinUnits" class="insulin-units">
+                                <button type="button" class="units-btn" id="editDecreaseUnits">
+                                    <img src="icons/minus-24.svg" alt="Decrease">
+                                </button>
+                                <span id="editUnitsValue">5</span>
+                                <button type="button" class="units-btn" id="editIncreaseUnits">
+                                    <img src="icons/plus-24.svg" alt="Increase">
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="input-group food-group">
+                <div class="form-row single">
+                    <div class="input-group food-group full-width">
                         <img src="icons/bread-units-24.svg" alt="Food" class="input-icon">
                         <div class="food-row">
                             <textarea id="editFood" placeholder="Еда"></textarea>
                             <div id="editBreadUnits" class="bread-units">
-                                <button type="button" class="units-btn units-btn-left" id="editDecreaseBreadUnits">
+                                <button type="button" class="units-btn" id="editDecreaseBreadUnits">
                                     <img src="icons/minus-24.svg" alt="Decrease">
                                 </button>
                                 <span id="editBreadUnitsValue">1.0</span>
-                                <button type="button" class="units-btn units-btn-right" id="editIncreaseBreadUnits">
+                                <button type="button" class="units-btn" id="editIncreaseBreadUnits">
                                     <img src="icons/plus-24.svg" alt="Increase">
                                 </button>
                             </div>
@@ -184,7 +198,7 @@
                 </div>
                 <div class="modal-buttons">
                     <button id="editDeleteBtn" type="button" class="modal-btn delete">
-                        <img src="icons/delete.svg" alt="Удалить" style="width:24px;height:24px;vertical-align:middle;">
+                        <img src="icons/delete.svg" alt="Удалить" style="width:20px;height:20px;">
                     </button>
                     <button id="editSaveBtn" type="submit" class="modal-btn black">Редактировать</button>
                 </div>
