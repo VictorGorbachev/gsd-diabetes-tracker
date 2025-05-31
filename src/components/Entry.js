@@ -27,11 +27,31 @@ class Entry {
         
         const details = [];
         
-        // Сахар
+        // Сахар с цветным индикатором как в оригинале
         if (this.sugar !== null && this.sugar !== undefined && this.sugar !== '') {
+            const sugarValue = parseFloat(this.sugar);
             const sugarSpan = document.createElement('span');
             sugarSpan.className = 'entry-sugar';
-            sugarSpan.textContent = `${Validation.formatSugarDisplay(this.sugar)} ммоль/л`;
+            
+            // Проверяем уровень сахара для красной точки (как в оригинале)
+            if (sugarValue > 10) {
+                sugarSpan.classList.add('high');
+                // Добавляем красную точку перед текстом
+                const dot = document.createElement('span');
+                dot.style.cssText = `
+                    width: 6px; 
+                    height: 6px; 
+                    background: #FF3B30; 
+                    border-radius: 50%; 
+                    display: inline-block; 
+                    margin-right: 4px;
+                    vertical-align: middle;
+                `;
+                sugarSpan.appendChild(dot);
+            }
+            
+            const textNode = document.createTextNode(`${Validation.formatSugarDisplay(this.sugar)} ммоль/л`);
+            sugarSpan.appendChild(textNode);
             details.push(sugarSpan);
         }
         
@@ -44,13 +64,15 @@ class Entry {
             details.push(insulinSpan);
         }
         
-        // Еда
+        // Еда (без отдельного элемента для хлебных единиц)
         if (this.food) {
             const foodSpan = document.createElement('span');
-            foodSpan.textContent = this.food;
+            foodSpan.className = 'entry-food';
+            let foodText = this.food;
             if (this.breadUnits) {
-                foodSpan.textContent += ` (${Validation.formatBreadUnitsDisplay(this.breadUnits)} ХЕ)`;
+                foodText += ` (${Validation.formatBreadUnitsDisplay(this.breadUnits)} ХЕ)`;
             }
+            foodSpan.textContent = foodText;
             details.push(foodSpan);
         }
         
@@ -63,11 +85,13 @@ class Entry {
             details.push(placeholderSpan);
         }
         
+        // Собираем детали с разделителями
         details.forEach((detail, index) => {
             if (index > 0) {
                 const separator = document.createElement('span');
                 separator.textContent = ' • ';
                 separator.style.opacity = '0.5';
+                separator.style.margin = '0 4px';
                 detailsElement.appendChild(separator);
             }
             detailsElement.appendChild(detail);
@@ -95,10 +119,13 @@ class Entry {
     handleClick() {
         // Показываем модальное окно действий с записью
         const modal = document.getElementById('entryActionsModal');
-        modal.classList.add('show');
+        if (modal) modal.classList.add('show');
         
         // Сохраняем ID текущей записи
         window.currentEditingEntryId = this.id;
+        if (window.gsdApp) {
+            window.gsdApp.currentEditingEntryId = this.id;
+        }
         
         // Обработчики кнопок
         const deleteBtn = document.getElementById('deleteEntryBtn');
@@ -106,83 +133,108 @@ class Entry {
         const cancelBtn = document.getElementById('cancelEntryActionBtn');
         
         // Удаляем старые обработчики
-        deleteBtn.replaceWith(deleteBtn.cloneNode(true));
-        editBtn.replaceWith(editBtn.cloneNode(true));
-        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+        if (deleteBtn) deleteBtn.replaceWith(deleteBtn.cloneNode(true));
+        if (editBtn) editBtn.replaceWith(editBtn.cloneNode(true));
+        if (cancelBtn) cancelBtn.replaceWith(cancelBtn.cloneNode(true));
         
         // Получаем новые ссылки
         const newDeleteBtn = document.getElementById('deleteEntryBtn');
         const newEditBtn = document.getElementById('editEntryBtn');
         const newCancelBtn = document.getElementById('cancelEntryActionBtn');
         
-        newDeleteBtn.addEventListener('click', () => {
-            modal.classList.remove('show');
-            this.showDeleteConfirmation();
-        });
+        if (newDeleteBtn) {
+            newDeleteBtn.addEventListener('click', () => {
+                modal.classList.remove('show');
+                this.showDeleteConfirmation();
+            });
+        }
         
-        newEditBtn.addEventListener('click', () => {
-            modal.classList.remove('show');
-            this.showEditModal();
-        });
+        if (newEditBtn) {
+            newEditBtn.addEventListener('click', () => {
+                modal.classList.remove('show');
+                this.showEditModal();
+            });
+        }
         
-        newCancelBtn.addEventListener('click', () => {
-            modal.classList.remove('show');
-            window.currentEditingEntryId = null;
-        });
+        if (newCancelBtn) {
+            newCancelBtn.addEventListener('click', () => {
+                modal.classList.remove('show');
+                window.currentEditingEntryId = null;
+                if (window.gsdApp) {
+                    window.gsdApp.currentEditingEntryId = null;
+                }
+            });
+        }
     }
     
     showDeleteConfirmation() {
         const modal = document.getElementById('confirmDeleteEntryModal');
-        modal.classList.add('show');
+        if (modal) modal.classList.add('show');
         
         const cancelBtn = document.getElementById('cancelDeleteEntryBtn');
         const confirmBtn = document.getElementById('confirmDeleteEntryBtn');
         
         // Удаляем старые обработчики
-        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-        confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+        if (cancelBtn) cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+        if (confirmBtn) confirmBtn.replaceWith(confirmBtn.cloneNode(true));
         
         // Получаем новые ссылки
         const newCancelBtn = document.getElementById('cancelDeleteEntryBtn');
         const newConfirmBtn = document.getElementById('confirmDeleteEntryBtn');
         
-        newCancelBtn.addEventListener('click', () => {
-            modal.classList.remove('show');
-        });
+        if (newCancelBtn) {
+            newCancelBtn.addEventListener('click', () => {
+                modal.classList.remove('show');
+            });
+        }
         
-        newConfirmBtn.addEventListener('click', () => {
-            modal.classList.remove('show');
-            this.delete();
-        });
+        if (newConfirmBtn) {
+            newConfirmBtn.addEventListener('click', () => {
+                modal.classList.remove('show');
+                this.delete();
+            });
+        }
     }
     
     showEditModal() {
         const modal = document.getElementById('editEntryModal');
-        modal.classList.add('show');
+        if (modal) modal.classList.add('show');
         
         // Заполняем форму текущими данными
-        document.getElementById('editDate').value = this.date;
-        document.getElementById('editTime').value = this.time;
-        document.getElementById('editSugar').value = this.sugar || '';
-        document.getElementById('editInsulin').value = this.insulin || '';
-        document.getElementById('editUnitsValue').textContent = this.insulinUnits || 5;
-        document.getElementById('editFood').value = this.food || '';
-        document.getElementById('editBreadUnitsValue').textContent = this.breadUnits || 1.0;
+        const editDate = document.getElementById('editDate');
+        const editTime = document.getElementById('editTime');
+        const editSugar = document.getElementById('editSugar');
+        const editInsulin = document.getElementById('editInsulin');
+        const editUnitsValue = document.getElementById('editUnitsValue');
+        const editFood = document.getElementById('editFood');
+        const editBreadUnitsValue = document.getElementById('editBreadUnitsValue');
+        
+        if (editDate) editDate.value = this.date;
+        if (editTime) editTime.value = this.time;
+        if (editSugar) editSugar.value = this.sugar || '';
+        if (editInsulin) editInsulin.value = this.insulin || '';
+        if (editUnitsValue) editUnitsValue.textContent = this.insulinUnits || 5;
+        if (editFood) editFood.value = this.food || '';
+        if (editBreadUnitsValue) editBreadUnitsValue.textContent = this.breadUnits || 1.0;
         
         // Показываем/скрываем блок единиц инсулина
         const editInsulinUnits = document.getElementById('editInsulinUnits');
-        if (document.getElementById('editInsulin').value) {
-            editInsulinUnits.style.display = 'flex';
-        } else {
-            editInsulinUnits.style.display = 'none';
+        if (editInsulinUnits && editInsulin) {
+            if (editInsulin.value) {
+                editInsulinUnits.style.display = 'flex';
+            } else {
+                editInsulinUnits.style.display = 'none';
+            }
         }
         
         // Показываем/скрываем блок хлебных единиц
         const editBreadUnits = document.getElementById('editBreadUnits');
-        if (document.getElementById('editFood').value.trim()) {
-            editBreadUnits.style.display = 'flex';
-        } else {
-            editBreadUnits.style.display = 'none';
+        if (editBreadUnits && editFood) {
+            if (editFood.value.trim()) {
+                editBreadUnits.style.display = 'flex';
+            } else {
+                editBreadUnits.style.display = 'none';
+            }
         }
     }
     
@@ -194,8 +246,10 @@ class Entry {
             }
             
             // Обновляем интерфейс
-            window.gsdApp.loadEntries();
-            window.gsdApp.showSuccessBanner('deleteSuccessBanner');
+            if (window.gsdApp) {
+                window.gsdApp.loadEntries();
+                window.gsdApp.showSuccessBanner('deleteSuccessBanner');
+            }
         }
     }
     
