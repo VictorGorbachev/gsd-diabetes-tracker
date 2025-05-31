@@ -22,9 +22,11 @@ class GSDApp {
         
         // Обновляем время каждую минуту
         setInterval(() => {
-            if (!document.getElementById('time').value) {
-                document.getElementById('time').value = DateUtils.getCurrentTime();
+            const timeInput = document.getElementById('time');
+            if (!timeInput.value || timeInput === document.activeElement) {
+                return; // Не обновляем если поле активно или уже заполнено
             }
+            timeInput.value = DateUtils.getCurrentTime();
         }, 60000);
     }
     
@@ -48,9 +50,12 @@ class GSDApp {
         this.setupFoodFieldHandlers();
         
         // Настройки
-        document.querySelector('.settings-icon').addEventListener('click', () => {
-            this.showSettingsModal();
-        });
+        const settingsIcon = document.querySelector('.settings-icon');
+        if (settingsIcon) {
+            settingsIcon.addEventListener('click', () => {
+                this.showSettingsModal();
+            });
+        }
         
         // Закрытие модальных окон по клику вне них
         this.setupModalCloseHandlers();
@@ -60,6 +65,8 @@ class GSDApp {
         const decreaseBtn = document.getElementById(`${prefix}decreaseUnits`);
         const increaseBtn = document.getElementById(`${prefix}increaseUnits`);
         const valueElement = document.getElementById(valueElementId);
+        
+        if (!decreaseBtn || !increaseBtn || !valueElement) return;
         
         decreaseBtn.addEventListener('click', () => {
             let value = parseInt(valueElement.textContent);
@@ -81,6 +88,8 @@ class GSDApp {
         const increaseBtn = document.getElementById(`${prefix}increaseBreadUnits`);
         const valueElement = document.getElementById(valueElementId);
         
+        if (!decreaseBtn || !increaseBtn || !valueElement) return;
+        
         decreaseBtn.addEventListener('click', () => {
             let value = parseFloat(valueElement.textContent);
             if (value > 0.5) {
@@ -101,25 +110,34 @@ class GSDApp {
         const insulinSelect = document.getElementById('insulin');
         const insulinUnits = document.getElementById('insulinUnits');
         
-        insulinSelect.addEventListener('change', () => {
+        if (insulinSelect && insulinUnits) {
+            insulinSelect.addEventListener('change', () => {
+                if (insulinSelect.value) {
+                    insulinUnits.style.display = 'flex';
+                } else {
+                    insulinUnits.style.display = 'none';
+                }
+            });
+            
+            // Инициализация на старте
             if (insulinSelect.value) {
                 insulinUnits.style.display = 'flex';
-            } else {
-                insulinUnits.style.display = 'none';
             }
-        });
+        }
         
         // Форма редактирования
         const editInsulinSelect = document.getElementById('editInsulin');
         const editInsulinUnits = document.getElementById('editInsulinUnits');
         
-        editInsulinSelect.addEventListener('change', () => {
-            if (editInsulinSelect.value) {
-                editInsulinUnits.style.display = 'flex';
-            } else {
-                editInsulinUnits.style.display = 'none';
-            }
-        });
+        if (editInsulinSelect && editInsulinUnits) {
+            editInsulinSelect.addEventListener('change', () => {
+                if (editInsulinSelect.value) {
+                    editInsulinUnits.style.display = 'flex';
+                } else {
+                    editInsulinUnits.style.display = 'none';
+                }
+            });
+        }
     }
     
     setupFoodFieldHandlers() {
@@ -127,46 +145,54 @@ class GSDApp {
         const foodField = document.getElementById('food');
         const breadUnits = document.getElementById('breadUnits');
         
-        foodField.addEventListener('input', () => {
-            if (foodField.value.trim()) {
-                breadUnits.style.display = 'flex';
-            } else {
-                breadUnits.style.display = 'none';
-            }
-        });
+        if (foodField && breadUnits) {
+            foodField.addEventListener('input', () => {
+                if (foodField.value.trim()) {
+                    breadUnits.style.display = 'flex';
+                } else {
+                    breadUnits.style.display = 'none';
+                }
+            });
+        }
         
         // Форма редактирования
         const editFoodField = document.getElementById('editFood');
         const editBreadUnits = document.getElementById('editBreadUnits');
         
-        editFoodField.addEventListener('input', () => {
-            if (editFoodField.value.trim()) {
-                editBreadUnits.style.display = 'flex';
-            } else {
-                editBreadUnits.style.display = 'none';
-            }
-        });
+        if (editFoodField && editBreadUnits) {
+            editFoodField.addEventListener('input', () => {
+                if (editFoodField.value.trim()) {
+                    editBreadUnits.style.display = 'flex';
+                } else {
+                    editBreadUnits.style.display = 'none';
+                }
+            });
+        }
     }
     
     setupModalHandlers() {
         // Форма редактирования
         const editForm = document.getElementById('editEntryForm');
-        editForm.addEventListener('submit', (e) => this.handleEditSubmit(e));
+        if (editForm) {
+            editForm.addEventListener('submit', (e) => this.handleEditSubmit(e));
+        }
         
         // Кнопка удаления в форме редактирования
         const editDeleteBtn = document.getElementById('editDeleteBtn');
-        editDeleteBtn.addEventListener('click', () => {
-            const modal = document.getElementById('editEntryModal');
-            modal.classList.remove('show');
-            
-            if (this.currentEditingEntryId) {
-                const entry = this.entries.find(e => e.id === this.currentEditingEntryId);
-                if (entry) {
-                    const entryObj = new Entry(entry);
-                    entryObj.showDeleteConfirmation();
+        if (editDeleteBtn) {
+            editDeleteBtn.addEventListener('click', () => {
+                const modal = document.getElementById('editEntryModal');
+                if (modal) modal.classList.remove('show');
+                
+                if (this.currentEditingEntryId) {
+                    const entry = this.entries.find(e => e.id === this.currentEditingEntryId);
+                    if (entry) {
+                        const entryObj = new Entry(entry);
+                        entryObj.showDeleteConfirmation();
+                    }
                 }
-            }
-        });
+            });
+        }
         
         // Настройки
         this.setupSettingsHandlers();
@@ -176,14 +202,18 @@ class GSDApp {
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
         
-        exportBtn.addEventListener('click', () => {
-            Storage.exportData();
-            this.closeAllModals();
-        });
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                Storage.exportData();
+                this.closeAllModals();
+            });
+        }
         
-        importBtn.addEventListener('click', () => {
-            this.showImportDialog();
-        });
+        if (importBtn) {
+            importBtn.addEventListener('click', () => {
+                this.showImportDialog();
+            });
+        }
     }
     
     setupModalCloseHandlers() {
@@ -200,7 +230,6 @@ class GSDApp {
     handleFormSubmit(e) {
         e.preventDefault();
         
-        const formData = new FormData(e.target);
         const entryData = {
             date: document.getElementById('date').value,
             time: document.getElementById('time').value,
@@ -265,13 +294,25 @@ class GSDApp {
     }
     
     resetForm() {
-        document.getElementById('gsdForm').reset();
-        document.getElementById('date').value = DateUtils.getCurrentDate();
-        document.getElementById('time').value = DateUtils.getCurrentTime();
-        document.getElementById('unitsValue').textContent = '8';
-        document.getElementById('breadUnitsValue').textContent = '1.0';
-        document.getElementById('insulinUnits').style.display = 'flex';
-        document.getElementById('breadUnits').style.display = 'none';
+        const form = document.getElementById('gsdForm');
+        if (form) form.reset();
+        
+        // Восстанавливаем значения по умолчанию
+        const dateField = document.getElementById('date');
+        const timeField = document.getElementById('time');
+        const unitsValue = document.getElementById('unitsValue');
+        const breadUnitsValue = document.getElementById('breadUnitsValue');
+        const insulinUnits = document.getElementById('insulinUnits');
+        const breadUnits = document.getElementById('breadUnits');
+        
+        if (dateField) dateField.value = DateUtils.getCurrentDate();
+        if (timeField) timeField.value = DateUtils.getCurrentTime();
+        if (unitsValue) unitsValue.textContent = '8';
+        if (breadUnitsValue) breadUnitsValue.textContent = '1.0';
+        
+        // Сбрасываем видимость блоков
+        if (insulinUnits) insulinUnits.style.display = 'flex';
+        if (breadUnits) breadUnits.style.display = 'none';
     }
     
     loadEntries() {
@@ -282,7 +323,7 @@ class GSDApp {
     
     showSettingsModal() {
         const modal = document.getElementById('settingsModal');
-        modal.classList.add('show');
+        if (modal) modal.classList.add('show');
     }
     
     showImportDialog() {
@@ -296,18 +337,18 @@ class GSDApp {
             
             try {
                 const modal = document.getElementById('importConfirmModal');
-                modal.classList.add('show');
+                if (modal) modal.classList.add('show');
                 
                 const cancelBtn = document.getElementById('cancelImport');
                 const confirmBtn = document.getElementById('confirmImport');
                 
                 const handleCancel = () => {
-                    modal.classList.remove('show');
+                    if (modal) modal.classList.remove('show');
                     cleanup();
                 };
                 
                 const handleConfirm = async () => {
-                    modal.classList.remove('show');
+                    if (modal) modal.classList.remove('show');
                     
                     try {
                         const importedCount = await Storage.importData(file);
@@ -321,12 +362,12 @@ class GSDApp {
                 };
                 
                 const cleanup = () => {
-                    cancelBtn.removeEventListener('click', handleCancel);
-                    confirmBtn.removeEventListener('click', handleConfirm);
+                    if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
+                    if (confirmBtn) confirmBtn.removeEventListener('click', handleConfirm);
                 };
                 
-                cancelBtn.addEventListener('click', handleCancel);
-                confirmBtn.addEventListener('click', handleConfirm);
+                if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
+                if (confirmBtn) confirmBtn.addEventListener('click', handleConfirm);
                 
             } catch (error) {
                 alert('Ошибка чтения файла: ' + error.message);
@@ -338,11 +379,13 @@ class GSDApp {
     
     showSuccessBanner(bannerId) {
         const banner = document.getElementById(bannerId);
-        banner.style.display = 'block';
-        
-        setTimeout(() => {
-            banner.style.display = 'none';
-        }, 3000);
+        if (banner) {
+            banner.style.display = 'block';
+            
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 3000);
+        }
     }
     
     closeAllModals() {
