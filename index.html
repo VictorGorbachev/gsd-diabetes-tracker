@@ -1,316 +1,338 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GSD Tracker</title>
-    <link rel="stylesheet" href="src/styles/variables.css">
-    <link rel="stylesheet" href="src/styles/main.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дневник сахара - ГСД</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Дневник сахара для ГСД - приложение для мониторинга уровня глюкозы при гестационном сахарном диабете">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E">
 </head>
 <body>
-    <div class="container">
-        <form id="gsdForm" class="form">
-            <div class="heading-block-form">
-                <div class="heading-form">
-                    <h2>Дневник сахара</h2>
-                    <p>Анна Шведюк</p>                    
-                </div>
-                <svg class="settings-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.5-3.5L19 8.5m-14 7L7.5 13m7-7L16 7.5m-8 8L6.5 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+    const { Calendar, Clock, Droplet, Syringe, Plus, Minus, UtensilsCrossed, Navigation, ChevronDown, Menu } = lucide;
+
+    const SugarDiary = () => {
+      const [date, setDate] = useState('31.05.2025');
+      const [time, setTime] = useState('13:09');
+      const [sugar, setSugar] = useState(5.1);
+      const [insulin, setInsulin] = useState('Новорапид');
+      const [insulinDose, setInsulinDose] = useState(8);
+      const [notes, setNotes] = useState('');
+      const [measurementType, setMeasurementType] = useState('натощак');
+
+      // Логика маркировки для ГСД (гестационный сахарный диабет)
+      const getGSDSugarBadgeColor = (value, type) => {
+        // Нормы для ГСД:
+        // Натощак: < 5.1 ммоль/л
+        // Через 1 час после еды: < 10.0 ммоль/л
+        // Через 2 часа после еды: < 8.5 ммоль/л
+        
+        let targetLevel;
+        if (type === 'натощак') {
+          targetLevel = 5.1;
+        } else if (type === '1 час после еды') {
+          targetLevel = 10.0;
+        } else if (type === '2 часа после еды') {
+          targetLevel = 8.5;
+        } else {
+          targetLevel = 5.1; // по умолчанию натощак
+        }
+
+        if (value >= targetLevel + 2) return 'bg-red-600 text-white'; // Критично высокие
+        if (value >= targetLevel) return 'bg-red-400 text-white';     // Превышение нормы ГСД
+        if (value >= targetLevel - 1) return 'bg-yellow-500 text-white'; // Пограничные
+        if (value >= 3.0) return 'bg-green-500 text-white';          // Нормальные для ГСД
+        if (value >= 2.0) return 'bg-gray-900 text-white';           // Низкие, но безопасные
+        return 'bg-red-500 text-white';                              // Опасно низкие (гипогликемия)
+      };
+
+      const getSugarDisplay = (value, type = 'натощак') => {
+        // Специальная логика отображения для ГСД
+        if (value === 5) {
+          return { showDroplet: false, bgColor: 'bg-teal-500 text-white' };
+        }
+        return { showDroplet: true, bgColor: getGSDSugarBadgeColor(value, type) };
+      };
+
+      const handleSugarChange = (increment) => {
+        if (increment) {
+          setSugar(Math.round((sugar + 0.1) * 10) / 10);
+        } else if (sugar > 0.1) {
+          setSugar(Math.round((sugar - 0.1) * 10) / 10);
+        }
+      };
+
+      const handleInsulinDoseChange = (increment) => {
+        if (increment) {
+          setInsulinDose(insulinDose + 1);
+        } else if (insulinDose > 0) {
+          setInsulinDose(insulinDose - 1);
+        }
+      };
+
+      return React.createElement('div', { className: 'min-h-screen bg-gray-50 p-4' },
+        React.createElement('div', { className: 'mx-auto max-w-md space-y-4' },
+          React.createElement('div', { className: 'bg-white rounded-2xl p-6 shadow-sm' },
+            React.createElement('div', { className: 'flex items-center justify-between mb-6' },
+              React.createElement('div', null,
+                React.createElement('h1', { className: 'text-xl font-semibold text-gray-900' }, 'Дневник сахара'),
+                React.createElement('p', { className: 'text-sm text-blue-600 font-medium mt-1' }, 'ГСД • Гестационный диабет')
+              ),
+              React.createElement(Navigation, { className: 'w-5 h-5 text-gray-400' })
+            ),
+
+            React.createElement('div', { className: 'grid grid-cols-2 gap-4 mb-6' },
+              React.createElement('div', { className: 'flex items-center space-x-3 bg-gray-50 rounded-lg px-3 py-3' },
+                React.createElement(Calendar, { className: 'w-5 h-5 text-gray-400' }),
+                React.createElement('input', {
+                  type: 'text',
+                  value: date,
+                  onChange: (e) => setDate(e.target.value),
+                  className: 'bg-transparent text-sm font-medium text-gray-900 border-none outline-none flex-1'
+                })
+              ),
+              React.createElement('div', { className: 'flex items-center space-x-3 bg-gray-50 rounded-lg px-3 py-3' },
+                React.createElement(Clock, { className: 'w-5 h-5 text-gray-400' }),
+                React.createElement('input', {
+                  type: 'text',
+                  value: time,
+                  onChange: (e) => setTime(e.target.value),
+                  className: 'bg-transparent text-sm font-medium text-gray-900 border-none outline-none flex-1'
+                })
+              )
+            ),
+
+            React.createElement('div', { className: 'mb-6' },
+              React.createElement('div', { className: 'flex items-center space-x-3 mb-2' },
+                React.createElement(Droplet, { className: 'w-5 h-5 text-gray-400' }),
+                React.createElement('span', { className: 'text-sm font-medium text-gray-700' }, 'Сахар')
+              ),
+              
+              React.createElement('div', { className: 'mb-3' },
+                React.createElement('select', {
+                  value: measurementType,
+                  onChange: (e) => setMeasurementType(e.target.value),
+                  className: 'w-full bg-gray-50 rounded-lg px-3 py-2 text-sm font-medium text-gray-900 border-none outline-none'
+                },
+                  React.createElement('option', { value: 'натощак' }, 'Натощак (норма < 5.1)'),
+                  React.createElement('option', { value: '1 час после еды' }, '1 час после еды (норма < 10.0)'),
+                  React.createElement('option', { value: '2 часа после еды' }, '2 часа после еды (норма < 8.5)')
+                )
+              ),
+
+              React.createElement('div', { className: 'flex items-center justify-center bg-gray-50 rounded-lg py-6' },
+                React.createElement('button', {
+                  onClick: () => handleSugarChange(false),
+                  className: 'p-2 rounded-full hover:bg-gray-200 transition-colors'
+                },
+                  React.createElement(Minus, { className: 'w-4 h-4 text-gray-600' })
+                ),
+                React.createElement('input', {
+                  type: 'number',
+                  step: '0.1',
+                  min: '0.1',
+                  max: '30',
+                  value: sugar,
+                  onChange: (e) => setSugar(parseFloat(e.target.value) || 0.1),
+                  className: 'mx-4 text-3xl font-semibold text-gray-900 bg-transparent border-none outline-none text-center w-24'
+                }),
+                React.createElement('button', {
+                  onClick: () => handleSugarChange(true),
+                  className: 'p-2 rounded-full hover:bg-gray-200 transition-colors'
+                },
+                  React.createElement(Plus, { className: 'w-4 h-4 text-gray-600' })
+                )
+              )
+            ),
+
+            React.createElement('div', { className: 'mb-6' },
+              React.createElement('div', { className: 'flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3' },
+                React.createElement('div', { className: 'flex items-center space-x-3' },
+                  React.createElement(Syringe, { className: 'w-5 h-5 text-gray-400' }),
+                  React.createElement('div', { className: 'flex items-center space-x-2' },
+                    React.createElement('select', {
+                      value: insulin,
+                      onChange: (e) => setInsulin(e.target.value),
+                      className: 'bg-transparent text-sm font-medium text-gray-900 border-none outline-none appearance-none pr-6'
+                    },
+                      React.createElement('option', { value: 'Новорапид' }, 'Новорапид'),
+                      React.createElement('option', { value: 'Левемир' }, 'Левемир'),
+                      React.createElement('option', { value: 'Актрапид' }, 'Актрапид')
+                    ),
+                    React.createElement(ChevronDown, { className: 'w-4 h-4 text-gray-400' })
+                  )
+                ),
+                React.createElement('div', { className: 'flex items-center space-x-3' },
+                  React.createElement('button', {
+                    onClick: () => handleInsulinDoseChange(false),
+                    className: 'p-1 rounded-full hover:bg-gray-200 transition-colors'
+                  },
+                    React.createElement(Minus, { className: 'w-3 h-3 text-gray-600' })
+                  ),
+                  React.createElement('span', { className: 'text-lg font-semibold text-gray-900 w-8 text-center' }, insulinDose),
+                  React.createElement('button', {
+                    onClick: () => handleInsulinDoseChange(true),
+                    className: 'p-1 rounded-full hover:bg-gray-200 transition-colors'
+                  },
+                    React.createElement(Plus, { className: 'w-3 h-3 text-gray-600' })
+                  )
+                )
+              )
+            ),
+
+            React.createElement('div', { className: 'mb-6' },
+              React.createElement('div', { className: 'flex items-center space-x-3 bg-gray-50 rounded-lg px-3 py-3' },
+                React.createElement(UtensilsCrossed, { className: 'w-5 h-5 text-gray-400' }),
+                React.createElement('input', {
+                  type: 'text',
+                  placeholder: 'Еда',
+                  value: notes,
+                  onChange: (e) => setNotes(e.target.value),
+                  className: 'bg-transparent text-sm text-gray-900 placeholder-gray-400 border-none outline-none flex-1'
+                })
+              )
+            ),
+
+            React.createElement('button', { className: 'w-full bg-black text-white rounded-xl py-4 font-medium text-sm hover:bg-gray-800 transition-colors' },
+              'Добавить'
+            ),
+
+            React.createElement('div', { className: 'mt-4 p-3 bg-blue-50 rounded-lg' },
+              React.createElement('h3', { className: 'text-xs font-semibold text-blue-800 mb-2' }, 'Целевые значения при ГСД:'),
+              React.createElement('div', { className: 'space-y-1 text-xs text-blue-700' },
+                React.createElement('div', null, '• Натощак: < 5.1 ммоль/л'),
+                React.createElement('div', null, '• Через 1 час: < 10.0 ммоль/л'),
+                React.createElement('div', null, '• Через 2 часа: < 8.5 ммоль/л')
+              )
+            )
+          ),
+
+          React.createElement('div', { className: 'bg-white rounded-2xl p-6 shadow-sm' },
+            React.createElement('h2', { className: 'text-lg font-semibold text-gray-900 mb-4' }, 'Сегодня'),
             
-            <!-- Дата и время -->
-            <div class="form-row">
-                <div class="input-group">
-                    <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
-                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
-                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                    <input type="date" id="date" required>
-                </div>
-                <div class="input-group">
-                    <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 9l0 4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M17 6l1.5-1.5" stroke="currentColor" stroke-width="2"/>
-                        <path d="M6.5 4.5L8 6" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                    <input type="time" id="time" required>
-                </div>
-            </div>
+            React.createElement('div', { className: 'space-y-3' },
+              React.createElement('div', { className: 'flex items-center justify-between py-2' },
+                React.createElement('div', { className: 'flex items-center space-x-4' },
+                  React.createElement(Clock, { className: 'w-4 h-4 text-gray-400' }),
+                  React.createElement('span', { className: 'text-sm font-medium text-gray-900' }, '13:18'),
+                  React.createElement('div', { className: 'flex items-center space-x-1 text-xs text-gray-600' },
+                    React.createElement(Syringe, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, 'Новорапид 7 ед.')
+                  )
+                ),
+                React.createElement(Menu, { className: 'w-4 h-4 text-gray-400' })
+              ),
 
-            <!-- Сахар -->
-            <div class="form-row single">
-                <div class="input-group full-width">
-                    <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M7.5 8A5.5 5.5 0 0 1 13 2.5c2.8 0 5.2 2.2 5.5 5a5.5 5.5 0 0 1-5 5.5 5.5 5.5 0 0 1-5.5-5z" stroke="currentColor" stroke-width="2"/>
-                        <path d="M16.5 16A5.5 5.5 0 0 1 11 21.5c-2.8 0-5.2-2.2-5.5-5a5.5 5.5 0 0 1 5-5.5 5.5 5.5 0 0 1 5.5 5z" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="12" cy="12" r="1" fill="currentColor"/>
-                    </svg>
-                    <input type="number" id="sugar" step="0.1" placeholder="Сахар">
-                </div>
-            </div>
+              React.createElement('div', { className: 'flex items-center justify-between py-2' },
+                React.createElement('div', { className: 'flex items-center space-x-4' },
+                  React.createElement(Clock, { className: 'w-4 h-4 text-gray-400' }),
+                  React.createElement('span', { className: 'text-sm font-medium text-gray-900' }, '13:16'),
+                  React.createElement('div', { className: `flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getSugarDisplay(4.8, 'натощак').bgColor}` },
+                    getSugarDisplay(4.8, 'натощак').showDroplet && React.createElement(Droplet, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, '4.8')
+                  ),
+                  React.createElement('span', { className: 'text-xs text-gray-500' }, 'натощак'),
+                  React.createElement('div', { className: 'flex items-center space-x-1 text-xs text-gray-600' },
+                    React.createElement(Syringe, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, 'Новорапид 7 ед.')
+                  )
+                ),
+                React.createElement(Menu, { className: 'w-4 h-4 text-gray-400' })
+              ),
 
-            <!-- Инсулин -->
-            <div class="form-row single">
-                <div class="input-group full-width">
-                    <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <rect x="9" y="2" width="6" height="20" rx="3" ry="3" stroke="currentColor" stroke-width="2"/>
-                        <rect x="7" y="6" width="10" height="2" rx="1" ry="1" stroke="currentColor" stroke-width="2"/>
-                        <rect x="7" y="16" width="10" height="2" rx="1" ry="1" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                    <div class="insulin-group">
-                        <select class="insulin-select" id="insulin">
-                            <option value="">Нет</option>
-                            <option value="novorapid" selected>Новорапид</option>
-                            <option value="levemir">Левемир</option>
-                        </select>
-                        <div id="insulinUnits" class="insulin-units" style="display: flex;">
-                            <button type="button" class="units-btn" id="decreaseUnits">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                            </button>
-                            <span id="unitsValue">8</span>
-                            <button type="button" class="units-btn" id="increaseUnits">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                    <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
-                                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+              React.createElement('div', { className: 'flex items-center justify-between py-2' },
+                React.createElement('div', { className: 'flex items-center space-x-4' },
+                  React.createElement(Clock, { className: 'w-4 h-4 text-gray-400' }),
+                  React.createElement('span', { className: 'text-sm font-medium text-gray-900' }, '15:17'),
+                  React.createElement('div', { className: `flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getSugarDisplay(9.2, '1 час после еды').bgColor}` },
+                    getSugarDisplay(9.2, '1 час после еды').showDroplet && React.createElement(Droplet, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, '9.2')
+                  ),
+                  React.createElement('span', { className: 'text-xs text-gray-500' }, '1ч после еды'),
+                  React.createElement('div', { className: 'flex items-center space-x-1 text-xs text-gray-600' },
+                    React.createElement(Syringe, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, 'Новорапид 7 ед.')
+                  )
+                ),
+                React.createElement(Menu, { className: 'w-4 h-4 text-gray-400' })
+              ),
 
-            <!-- Еда -->
-            <div class="form-row single">
-                <div class="input-group food-group full-width">
-                    <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 5c1.5 0 3 .5 4 1.5L12 12l-4-5.5C9 5.5 10.5 5 12 5z" stroke="currentColor" stroke-width="2"/>
-                        <path d="M8 12c0 2.2 1.8 4 4 4s4-1.8 4-4" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                    <div class="food-row">
-                        <textarea id="food" placeholder="Еда"></textarea>
-                        <div id="chipsContainer" class="chips-container" style="display: none;"></div>
-                        <div id="breadUnits" class="bread-units">
-                            <button type="button" class="units-btn" id="decreaseBreadUnits">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                            </button>
-                            <span id="breadUnitsValue">1.0</span>
-                            <button type="button" class="units-btn" id="increaseBreadUnits">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                    <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
-                                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                            </button>
-                        </div>                        
-                    </div>
-                </div>
-            </div>
+              React.createElement('div', { className: 'flex items-center justify-between py-2' },
+                React.createElement('div', { className: 'flex items-center space-x-4' },
+                  React.createElement(Clock, { className: 'w-4 h-4 text-gray-400' }),
+                  React.createElement('span', { className: 'text-sm font-medium text-gray-900' }, '16:17'),
+                  React.createElement('div', { className: `flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getSugarDisplay(7.8, '2 часа после еды').bgColor}` },
+                    getSugarDisplay(7.8, '2 часа после еды').showDroplet && React.createElement(Droplet, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, '7.8')
+                  ),
+                  React.createElement('span', { className: 'text-xs text-gray-500' }, '2ч после еды'),
+                  React.createElement('div', { className: 'flex items-center space-x-1 text-xs text-gray-600' },
+                    React.createElement(Syringe, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, 'Новорапид 0 ед.')
+                  )
+                ),
+                React.createElement(Menu, { className: 'w-4 h-4 text-gray-400' })
+              ),
 
-            <button type="submit" class="submit-btn">Добавить</button>
-        </form>
+              React.createElement('div', { className: 'flex items-center justify-between py-2' },
+                React.createElement('div', { className: 'flex items-center space-x-4' },
+                  React.createElement(Clock, { className: 'w-4 h-4 text-gray-400' }),
+                  React.createElement('span', { className: 'text-sm font-medium text-gray-900' }, '18:17'),
+                  React.createElement('div', { className: `flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getSugarDisplay(5.8, 'натощак').bgColor}` },
+                    getSugarDisplay(5.8, 'натощак').showDroplet && React.createElement(Droplet, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, '5.8')
+                  ),
+                  React.createElement('span', { className: 'text-xs text-gray-500' }, 'натощак'),
+                  React.createElement('div', { className: 'flex items-center space-x-1 text-xs text-gray-600' },
+                    React.createElement(Syringe, { className: 'w-3 h-3' }),
+                    React.createElement('span', null, 'Левемир 7 ед.')
+                  )
+                ),
+                React.createElement(Menu, { className: 'w-4 h-4 text-gray-400' })
+              )
+            ),
 
-        <div id="flowersBlock" class="flowers-block" style="display:none"></div>
-        <div id="emptyEntriesStub" class="empty-entries-stub" style="display: block;">
-            <img src="img/first-note.png" alt="Первая запись" class="modal-img">
-            <div class="empty-entries-text">
-                <h2 class="empty-entries-title">Добавьте первую запись</h2>
-                <div class="text-descriptor empty-entries-desc">У вас пока нет ни одной записи.<br>Заполните форму, чтобы добавить первую.</div>
-            </div>
-        </div>
-        <div id="entries" class="entries"></div>
-    </div>
+            React.createElement('div', { className: 'mt-6 pt-4 border-t border-gray-100' },
+              React.createElement('div', { className: 'flex items-center space-x-2 text-sm text-gray-600 mb-3' },
+                React.createElement(Syringe, { className: 'w-4 h-4' }),
+                React.createElement('span', { className: 'font-medium' }, 'Всего 81 ед.')
+              ),
+              
+              React.createElement('div', { className: 'text-xs text-gray-500' },
+                React.createElement('div', { className: 'flex items-center space-x-4 flex-wrap' },
+                  React.createElement('div', { className: 'flex items-center space-x-1' },
+                    React.createElement('div', { className: 'w-3 h-3 rounded-full bg-green-500' }),
+                    React.createElement('span', null, 'Норма')
+                  ),
+                  React.createElement('div', { className: 'flex items-center space-x-1' },
+                    React.createElement('div', { className: 'w-3 h-3 rounded-full bg-yellow-500' }),
+                    React.createElement('span', null, 'Погранично')
+                  ),
+                  React.createElement('div', { className: 'flex items-center space-x-1' },
+                    React.createElement('div', { className: 'w-3 h-3 rounded-full bg-red-400' }),
+                    React.createElement('span', null, 'Выше нормы')
+                  ),
+                  React.createElement('div', { className: 'flex items-center space-x-1' },
+                    React.createElement('div', { className: 'w-3 h-3 rounded-full bg-red-600' }),
+                    React.createElement('span', null, 'Критично')
+                  )
+                )
+              )
+            )
+          )
+        )
+      );
+    };
 
-    <!-- Модальные окна -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <h3>Удалить запись?</h3>
-            <p>Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
-            <div class="modal-buttons">
-                <button id="cancelDelete" class="modal-btn cancel">Отмена</button>
-                <button id="confirmDelete" class="modal-btn confirm">Удалить</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="importConfirmModal" class="modal">
-        <div class="modal-content" style="text-align:center;">
-            <img class="modal-img" src="img/working-with-data.png" alt="Импорт данных">
-            <h3>Импорт данных</h3>
-            <div class="modal-buttons">
-                <button id="cancelImport" class="modal-btn cancel">Отменить</button>
-                <button id="confirmImport" class="modal-btn black">Импортировать</button>
-            </div>
-            <div class="text-descriptor">Импорт заменит все текущие записи. Старые данные будут удалены без возможности восстановления. Продолжить?</div>
-        </div>
-    </div>
-
-    <div id="entryActionsModal" class="modal">
-        <div class="modal-content">
-            <h3>Что сделать с записью?</h3>
-            <div class="modal-buttons">
-                <button id="deleteEntryBtn" class="modal-btn confirm">Удалить</button>
-                <span class="modal-text">Удалить запись навсегда без возможности восстановления</span>                
-                <button id="editEntryBtn" class="modal-btn black">Редактировать</button>
-                <span class="modal-text">Отредактировать запись: она исчезнет из списка, но все данные заполнятся в форму</span>
-                <button id="cancelEntryActionBtn" class="modal-btn cancel">Отмена</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="rewardModal" class="modal">
-        <div class="modal-content reward-modal-content">
-            <div class="reward-text">Ура! За вчерашний день у тебя не было ни одного вылета!<br>Так держать!</div>
-            <button id="closeRewardBtn" class="modal-btn black">УРА!</button>
-        </div>
-    </div>
-
-    <div id="editEntryModal" class="modal">
-        <div class="modal-content">
-            <form id="editEntryForm" class="form form-edit">
-                <div class="form-row">
-                    <div class="input-group">
-                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
-                            <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
-                            <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <input type="date" id="editDate" required>
-                    </div>
-                    <div class="input-group">
-                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/>
-                            <path d="M12 9l0 4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        <input type="time" id="editTime" required>
-                    </div>
-                </div>
-                <div class="form-row single">
-                    <div class="input-group full-width">
-                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M7.5 8A5.5 5.5 0 0 1 13 2.5c2.8 0 5.2 2.2 5.5 5a5.5 5.5 0 0 1-5 5.5 5.5 5.5 0 0 1-5.5-5z" stroke="currentColor" stroke-width="2"/>
-                            <path d="M16.5 16A5.5 5.5 0 0 1 11 21.5c-2.8 0-5.2-2.2-5.5-5a5.5 5.5 0 0 1 5-5.5 5.5 5.5 0 0 1 5.5 5z" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <input type="number" id="editSugar" step="0.1" placeholder="Сахар">
-                    </div>
-                </div>
-                <div class="form-row single">
-                    <div class="input-group full-width">
-                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <rect x="9" y="2" width="6" height="20" rx="3" ry="3" stroke="currentColor" stroke-width="2"/>
-                            <rect x="7" y="6" width="10" height="2" rx="1" ry="1" stroke="currentColor" stroke-width="2"/>
-                            <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <div class="insulin-group">
-                            <select class="insulin-select" id="editInsulin">
-                                <option value="">Нет</option>
-                                <option value="novorapid">Новорапид</option>
-                                <option value="levemir">Левемир</option>
-                            </select>
-                            <div id="editInsulinUnits" class="insulin-units">
-                                <button type="button" class="units-btn" id="editDecreaseUnits">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                    </svg>
-                                </button>
-                                <span id="editUnitsValue">5</span>
-                                <button type="button" class="units-btn" id="editIncreaseUnits">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
-                                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row single">
-                    <div class="input-group food-group full-width">
-                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <div class="food-row">
-                            <textarea id="editFood" placeholder="Еда"></textarea>
-                            <div id="editBreadUnits" class="bread-units">
-                                <button type="button" class="units-btn" id="editDecreaseBreadUnits">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                    </svg>
-                                </button>
-                                <span id="editBreadUnitsValue">1.0</span>
-                                <button type="button" class="units-btn" id="editIncreaseBreadUnits">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
-                                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-buttons">
-                    <button id="editDeleteBtn" type="button" class="modal-btn delete">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2"/>
-                            <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" stroke="currentColor" stroke-width="2"/>
-                            <line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" stroke-width="2"/>
-                            <line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </button>
-                    <button id="editSaveBtn" type="submit" class="modal-btn black">Редактировать</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="confirmDeleteEntryModal" class="modal">
-        <div class="modal-content" style="text-align:center;">
-            <img src="img/delete-an-entry.png" alt="Удалить запись" class="modal-img">
-            <h3>Удалить запись?</h3>
-            <div class="modal-buttons" style="justify-content:center;">
-                <button id="cancelDeleteEntryBtn" class="modal-btn cancel">Отменить</button>
-                <button id="confirmDeleteEntryBtn" class="modal-btn confirm">Удалить</button>
-            </div>
-            <div class="text-descriptor">При удалении этой записи она будет<br>безвозвратно удалена</div>
-        </div>
-    </div>
-
-    <div id="settingsModal" class="modal">
-        <div class="modal-content" style="text-align:center;">
-            <img class="modal-img" src="img/working-with-data.png" alt="Работа с данными">
-            <h3>Работа с данными</h3>
-            <div class="modal-buttons">
-                <button id="exportBtn" class="modal-btn action-btn">Экспорт данных</button>
-                <button id="importBtn" class="modal-btn action-btn">Импорт данных</button>
-            </div>
-            <div class="text-descriptor">Хранение данных важно для сохранения ценной информации, обеспечения безопасности и возможности быстрого восстановления в случае сбоев.</div>
-        </div>
-    </div>
-
-    <!-- Баннеры -->
-    <div id="importSuccessBanner" class="banner-success" style="display:none;">Данные успешно импортированы!</div>
-    <div id="editSuccessBanner" class="banner-success" style="display:none;">Изменения успешно сохранены!</div>
-    <div id="deleteSuccessBanner" class="banner-success" style="display:none;">Запись удалена успешно</div>
-
-    <!-- Скрипты -->
-    <script src="https://unpkg.com/airtable/build/airtable.browser.js"></script>
-    <script src="src/utils/dateUtils.js"></script>
-    <script src="src/utils/validation.js"></script>
-    <script src="src/utils/storage.js"></script>
-    <script src="src/utils/airtableSync.js"></script>
-    <script src="src/components/Entry.js"></script>
-    <script src="src/components/DayCard.js"></script>
-    <script src="src/main.js"></script>
+    ReactDOM.render(React.createElement(SugarDiary), document.getElementById('root'));
+  </script>
 </body>
 </html>
