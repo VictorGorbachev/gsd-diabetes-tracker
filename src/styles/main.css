@@ -26,9 +26,9 @@ body {
     background: var(--card-background);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-xl);
-    box-shadow: 0 2px 20px var(--shadow-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: var(--spacing-lg);
-    border: 1px solid var(--border-color);
+    border: none;
 }
 
 .heading-block-form {
@@ -42,7 +42,7 @@ body {
     font-size: var(--font-size-xlarge);
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 2px;
     letter-spacing: -0.5px;
 }
 
@@ -55,14 +55,14 @@ body {
 .settings-icon {
     width: 24px;
     height: 24px;
-    opacity: 0.6;
-    transition: opacity var(--transition-fast);
+    color: var(--text-secondary);
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: 2px;
+    transition: color var(--transition-fast);
 }
 
 .settings-icon:hover {
-    opacity: 1;
+    color: var(--text-primary);
 }
 
 .form-row {
@@ -92,15 +92,15 @@ body {
     left: var(--spacing-md);
     width: 20px;
     height: 20px;
-    opacity: 0.5;
+    color: var(--text-secondary);
     z-index: 1;
     pointer-events: none;
 }
 
 input, select, textarea {
     width: 100%;
-    padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 48px;
-    border: 1px solid var(--border-color);
+    padding: 15px 16px 15px 50px;
+    border: none;
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-normal);
     font-family: var(--font-family);
@@ -108,13 +108,13 @@ input, select, textarea {
     transition: all var(--transition-fast);
     color: var(--text-primary);
     font-weight: var(--font-weight-normal);
+    min-height: 50px;
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
     background: var(--card-background);
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
 input::placeholder, textarea::placeholder {
@@ -124,9 +124,9 @@ input::placeholder, textarea::placeholder {
 
 textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 50px;
     max-height: 120px;
-    padding-top: var(--spacing-md);
+    padding-top: 15px;
     line-height: 1.4;
 }
 
@@ -142,8 +142,8 @@ textarea {
     appearance: none;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="%23999" d="M1 2l5 4 5-4"/></svg>');
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
+    background-position: right 16px center;
+    padding-right: 40px;
     flex: 1;
     min-width: 140px;
 }
@@ -152,52 +152,47 @@ textarea {
     display: flex;
     align-items: center;
     background: var(--input-background);
-    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
     overflow: hidden;
-    height: 48px;
+    height: 50px;
+    min-width: 100px;
 }
 
 .units-btn {
     background: transparent;
     border: none;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background-color var(--transition-fast);
     height: 100%;
-    width: 40px;
+    width: 32px;
+    color: var(--text-secondary);
 }
 
 .units-btn:hover {
     background: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
 }
 
 .units-btn:active {
     background: rgba(0, 0, 0, 0.1);
 }
 
-.units-btn img {
-    width: 16px;
-    height: 16px;
-    opacity: 0.6;
-}
-
 #unitsValue, #editUnitsValue {
     padding: 0 var(--spacing-md);
     font-weight: var(--font-weight-semibold);
-    min-width: 40px;
+    min-width: 36px;
     text-align: center;
     background: var(--card-background);
-    border-left: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: var(--font-size-normal);
+    color: var(--text-primary);
 }
 
 /* Поле еды с хлебными единицами */
@@ -215,32 +210,31 @@ textarea {
     display: none;
     align-items: center;
     background: var(--input-background);
-    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
     overflow: hidden;
-    height: 48px;
-    margin-top: var(--spacing-sm);
+    height: 50px;
+    margin-top: var(--spacing-md);
     width: fit-content;
+    min-width: 100px;
 }
 
 #breadUnitsValue, #editBreadUnitsValue {
     padding: 0 var(--spacing-md);
     font-weight: var(--font-weight-semibold);
-    min-width: 50px;
+    min-width: 40px;
     text-align: center;
     background: var(--card-background);
-    border-left: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: var(--font-size-normal);
+    color: var(--text-primary);
 }
 
 .submit-btn {
     width: 100%;
-    padding: var(--spacing-md);
+    padding: 16px;
     background: var(--primary-color);
     color: white;
     border: none;
@@ -249,7 +243,7 @@ textarea {
     font-weight: var(--font-weight-semibold);
     cursor: pointer;
     transition: all var(--transition-fast);
-    height: 52px;
+    height: 54px;
     margin-top: var(--spacing-lg);
     letter-spacing: -0.2px;
 }
@@ -269,8 +263,7 @@ textarea {
     padding: var(--spacing-xl);
     background: var(--card-background);
     border-radius: var(--border-radius-lg);
-    box-shadow: 0 2px 20px var(--shadow-color);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .modal-img {
@@ -305,8 +298,7 @@ textarea {
     background: var(--card-background);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-xl);
-    box-shadow: 0 2px 20px var(--shadow-color);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .day-header {
@@ -324,18 +316,18 @@ textarea {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md);
+    padding: 14px 16px;
     background: var(--input-background);
     border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 10px;
     cursor: pointer;
     transition: all var(--transition-fast);
-    border: 1px solid transparent;
+    min-height: 54px;
 }
 
 .entry:hover {
     background: #ECECEC;
-    border-color: var(--border-color);
+    transform: translateY(-1px);
 }
 
 .entry:last-child {
@@ -346,7 +338,7 @@ textarea {
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
     font-size: var(--font-size-normal);
-    min-width: 50px;
+    min-width: 45px;
 }
 
 .entry-details {
@@ -362,30 +354,32 @@ textarea {
 .entry-sugar {
     color: var(--primary-color);
     font-weight: var(--font-weight-semibold);
-    background: #E3F2FD;
-    padding: 2px 6px;
-    border-radius: 4px;
+    background: rgba(0, 122, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
     font-size: 12px;
+    display: flex;
+    align-items: center;
 }
 
 .entry-sugar.high {
-    background: #FFEBEE;
+    background: rgba(255, 59, 48, 0.1);
     color: var(--error-color);
 }
 
 .entry-insulin {
     color: var(--secondary-color);
     font-weight: var(--font-weight-semibold);
-    background: #F3E5F5;
-    padding: 2px 6px;
-    border-radius: 4px;
+    background: rgba(88, 86, 214, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
     font-size: 12px;
 }
 
 .entry-food {
     color: var(--text-secondary);
     font-size: 12px;
-    max-width: 100px;
+    max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -418,7 +412,6 @@ textarea {
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    border: 1px solid var(--border-color);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
@@ -456,7 +449,6 @@ textarea {
 .modal-btn.cancel {
     background: var(--input-background);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
 }
 
 .modal-btn.cancel:hover {
@@ -581,10 +573,10 @@ textarea {
     .insulin-group {
         flex-direction: column;
         align-items: stretch;
+        gap: var(--spacing-md);
     }
     
     .insulin-units {
-        margin-top: var(--spacing-sm);
         align-self: flex-start;
     }
     
@@ -604,8 +596,7 @@ textarea {
     background: linear-gradient(135deg, #FFE5CC, #FFF0E5);
     border-radius: var(--border-radius-lg);
     margin-bottom: var(--spacing-lg);
-    box-shadow: 0 2px 20px var(--shadow-color);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .chips-container {
